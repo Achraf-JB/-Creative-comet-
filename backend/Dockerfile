@@ -4,12 +4,11 @@ WORKDIR /usr/src/app
 
 COPY package*.json ./
 
+# Install all dependencies including devDependencies
 RUN npm install
 
 COPY . .
 
-# Expose dev port
 EXPOSE 4000
 
-# Run in development mode
-CMD ["npm", "run", "dev"]
+CMD ["npm", "start"]
