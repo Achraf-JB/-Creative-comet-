@@ -1,23 +1,36 @@
-import express from "express";
-import mongoose from "mongoose";
-import dotenv from "dotenv";
-import cors from "cors";
-import taskRoutes from "./routes/taskRoutes.js";
-
+import dotenv from 'dotenv';
 dotenv.config();
 
+import express from 'express';
+import mongoose from 'mongoose';
+import cors from 'cors';
+import taskRoutes from './routes/taskRoutes.js';
+
 const app = express();
-app.use(cors());
+
+// Allow React to call backend
+app.use(cors({
+  origin: 'http://localhost:3000', // frontend
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  credentials: true
+}));
+
 app.use(express.json());
 
-// Routes
-app.use("/api/tasks", taskRoutes);
+app.use((req, res, next) => {
+  console.log(req.path, req.method);
+  next();
+});
 
-// DB Connection
-mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(() => console.log("✅ MongoDB connected"))
-  .catch(err => console.error(err));
+app.use('/api/tasks', taskRoutes);
 
-// Start server
-const PORT = process.env.PORT || 4000;
-app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => {
+    console.log('connected to database');
+    app.listen(process.env.PORT, () => {
+      console.log('listening for requests on port', process.env.PORT);
+    });
+  })
+  .catch((err) => {
+    console.log(err);
+  });
